@@ -1,3 +1,6 @@
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable no-alert */
+/* eslint-disable prettier/prettier */
 import React, {Component} from 'react';
 import {
   Text,
@@ -12,7 +15,8 @@ import {
 } from 'react-native';
 var {height, width} = Dimensions.get('window');
 import Swiper from 'react-native-swiper';
-
+import AsyncStorage from '@react-native-community/async-storage';
+import Icon from 'react-native-vector-icons/Ionicons';
 export default class App extends Component {
   constructor(props) {
     super(props);
@@ -38,6 +42,7 @@ export default class App extends Component {
       })
       .catch((error) => {
         console.error(error);
+        alert('error', error);
       });
   }
   _renderItem(item) {
@@ -76,9 +81,52 @@ export default class App extends Component {
           </Text>
           <Text>Descp Food and Details</Text>
           <Text style={{fontSize: 20, color: 'green'}}>${item.price}</Text>
+          <TouchableOpacity
+            onPress={() => this.onClickAddCart(item)}
+            style={{
+              width: width / 2 - 50,
+              backgroundColor: '#33c37d',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 5,
+              flexDirection: 'row',
+              padding: 5,
+            }}>
+            <Text style={{color: '#FFF', fontSize: 18, fontWeight: 'bold'}}>
+              Add Cart
+            </Text>
+            <View style={{width: 10}} />
+            <Icon name="ios-add-circle" size={30} color={'white'} />
+          </TouchableOpacity>
         </TouchableOpacity>
       );
     }
+  }
+
+  onClickAddCart(data) {
+    const itemcart = {
+      food: data,
+      quantity: 1,
+      price: data.price,
+    };
+
+    AsyncStorage.getItem('cart')
+      .then((datacart) => {
+        if (datacart !== null) {
+          // We have data!!
+          const cart = JSON.parse(datacart);
+          cart.push(itemcart);
+          AsyncStorage.setItem('cart', JSON.stringify(cart));
+        } else {
+          const cart = [];
+          cart.push(itemcart);
+          AsyncStorage.setItem('cart', JSON.stringify(cart));
+        }
+        alert('Add Successfull');
+      })
+      .catch((err) => {
+        alert(err);
+      });
   }
   render() {
     return (
@@ -115,7 +163,7 @@ export default class App extends Component {
               paddingVertical: 20,
               backgroundColor: 'white',
             }}>
-            <Text style={styles.titleCatg}>Categories</Text>
+            <View style={{height: 10}} />
             <FlatList
               horizontal={true}
               data={this.state.dataCategories}
